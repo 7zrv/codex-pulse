@@ -8,11 +8,10 @@ model: sonnet
 
 # 이슈 작업 시작
 
-## Ready Issues
-!`gh issue list --label "status: ready" --state open --limit 20`
-
-## Current Branch
-!`git branch --show-current`
+## Current State
+- **Ready issues**:
+!`gh issue list --label "status: ready" --state open --limit 20 2>/dev/null || echo "이슈 목록을 가져올 수 없습니다"`
+- **Current branch**: !`git branch --show-current`
 
 ## Instructions
 
@@ -31,7 +30,10 @@ model: sonnet
 | `enhancement` | `feat/` |
 | `bug` | `fix/` |
 | `documentation` | `docs/` |
+| 리팩토링 | `refactor/` |
 | 기타 | `chore/` |
+
+- 카테고리가 `enhancement`, `bug`, `documentation`에 해당하지 않는 경우, AskUserQuestion으로 `refactor/` 또는 `chore/` 중 적절한 prefix를 사용자에게 선택받는다
 
 ### 3. 브랜치명 생성
 - 이슈 제목을 영문 kebab-case로 변환한다
