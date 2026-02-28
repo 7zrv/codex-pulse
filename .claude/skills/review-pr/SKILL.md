@@ -9,7 +9,7 @@ model: sonnet
 
 # PR 리뷰
 
-## PR Info
+## Current State
 - **PR details**: !`gh pr view $ARGUMENTS 2>/dev/null || echo "PR 번호를 입력해주세요"`
 - **PR diff stat**: !`gh pr diff $ARGUMENTS --stat 2>/dev/null || echo "PR 번호를 입력해주세요"`
 
@@ -21,11 +21,18 @@ PR 번호를 입력받아 변경 사항을 분석하고 리뷰 결과를 제공�
 - `$ARGUMENTS`가 비어 있으면 사용자에게 PR 번호를 질문한다
 - 위에 주입된 PR details와 diff stat으로 개요를 파악한다
 - Bash로 `gh pr diff <PR번호>` 실행하여 상세 diff를 수집한다 (동적 주입 X — 토큰 절약)
-- `gh pr view <PR번호> --comments`로 기존 코멘트도 확인한다
+- Bash로 `gh pr view <PR번호> --comments`를 실행하여 기존 코멘트도 확인한다
 
 ### 2. 리뷰 수행
 리뷰 기준은 `.claude/skills/shared/review-criteria.md`를 따른다.
 해당 파일을 Read로 읽은 뒤 공통 기준에 따라 리뷰를 수행한다.
+
+해당 파일이 존재하지 않을 경우, 아래 인라인 기준을 사용한다:
+- **코드 품질**: 가독성, 중복 제거, 네이밍, 함수/모듈 분리
+- **버그 가능성**: 엣지 케이스, off-by-one, null/undefined 처리
+- **보안 이슈**: 인젝션, 하드코딩된 시크릿, 권한 검증 누락
+- **컨벤션 준수**: 프로젝트 코딩 스타일, lint 규칙, 포맷팅
+- **테스트**: 변경 사항에 대한 테스트 존재 여부 및 커버리지
 
 추가로 PR 전용 기준을 적용한다:
 - **PR 설명-코드 일치**: PR 본문의 설명이 실제 변경 내용과 일치하는지 확인
