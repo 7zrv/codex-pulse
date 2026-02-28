@@ -2,7 +2,7 @@
 name: Feature Request
 about: Suggest an idea for Codex Pulse
 title: "[Feature] "
-labels: enhancement
+labels: enhancement, status: ready
 assignees: ''
 ---
 
@@ -14,6 +14,9 @@ assignees: ''
 
 ## Alternatives Considered
 <!-- 고려한 대안이 있다면 설명 -->
+
+## 관련 파일
+- `path/to/file`
 
 ## Additional Context
 <!-- 참고 자료, 스크린샷 등 -->
