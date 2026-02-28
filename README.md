@@ -1,5 +1,10 @@
 # Codex Pulse
 
+[![GitHub release](https://img.shields.io/github/v/release/7zrv/codex-pulse)](https://github.com/7zrv/codex-pulse/releases)
+[![License](https://img.shields.io/github/license/7zrv/codex-pulse)](https://github.com/7zrv/codex-pulse/blob/main/LICENSE)
+[![Rust](https://img.shields.io/badge/Rust-1.56%2B-orange?logo=rust)](https://www.rust-lang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-green?logo=node.js)](https://nodejs.org/)
+
 Codex 로컬 앱 사용 환경을 기준으로, Rust 백엔드 + 기존 정적 UI(`public/*`)로 마이그레이션한 모니터입니다.
 
 ## 핵심 기능
