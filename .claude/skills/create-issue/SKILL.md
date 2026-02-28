@@ -7,10 +7,11 @@ allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion
 model: haiku
 ---
 
-# 이슈 생성
+# Create Issue
 
-## 기존 라벨 목록
-!`gh label list --limit 30`
+## Current State
+
+- **기존 라벨**: !`gh label list --limit 30 2>/dev/null || echo "라벨 목록을 가져올 수 없습니다"`
 
 ## Instructions
 
