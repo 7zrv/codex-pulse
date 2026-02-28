@@ -1,5 +1,75 @@
 # Codex Pulse — Claude Code 규칙
 
+## 프로젝트 개요
+
+Codex 에이전트의 실시간 모니터링 대시보드. Rust 백엔드 + Node.js 서버 + Electron 데스크톱 앱 구조.
+
+## 기술 스택
+
+- **Backend**: Rust (stable, edition 2021) — `src/main.rs`
+- **Server**: Node.js >= 20 (ESM) — `server.js`
+- **Desktop**: Electron — `desktop/main.js`
+- **Dependencies**: serde, serde_json, time
+
+## 프로젝트 구조
+
+```
+src/            Rust 백엔드
+server.js       Node.js SSE 서버
+public/         프론트엔드 정적 파일
+desktop/        Electron 앱
+scripts/        유틸리티 스크립트 (dispatch, collector, load test)
+agents/         에이전트 설정
+migration/      마이그레이션 파일
+.github/        CI, 이슈/PR 템플릿
+.claude/skills/ Claude Code 스킬 (commit, push, pr)
+```
+
+## 빌드 · 검증 명령
+
+```bash
+cargo build             # Rust 빌드 (debug)
+cargo build --release   # Rust 빌드 (release)
+cargo fmt --check       # 포맷 검사
+cargo clippy -- -D warnings  # 린트
+cargo test              # Rust 테스트
+npm install             # Node 의존성 설치
+npm run check           # Node 구문 검사 (전체 JS 파일)
+npm start               # 서버 실행
+```
+
+## CI 파이프라인
+
+`.github/workflows/ci.yml` — main push/PR 시 자동 실행:
+
+1. `cargo fmt --check`
+2. `cargo clippy -- -D warnings`
+3. `cargo test`
+4. `cargo build`
+5. `npm run check`
+
+## 브랜치 보호
+
+- `main`에 직접 푸시 불가 — 반드시 PR을 거쳐야 함
+- PR 머지 조건: CI 통과 + 1명 이상 승인 + 리뷰 스레드 해결
+- 머지 시 소스 브랜치 자동 삭제
+
+## 브랜치 · 커밋 컨벤션
+
+[CONTRIBUTING.md](./CONTRIBUTING.md)를 따른다.
+
+- **브랜치**: `feat/<name>`, `fix/<name>`, `docs/<name>`, `refactor/<name>`, `chore/<name>`
+- **커밋**: Conventional Commits — `<type>(<scope>): <description>`
+- **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`
+- **Scopes**: `api`, `sse`, `ui`, `desktop`, `collector`, `docs`
+- Subject line: lowercase, 70자 이내, 마침표 없음
+
+## PR 규칙
+
+- PR 템플릿(`.github/pull_request_template.md`)을 따른다.
+- 관련 이슈가 있으면 본문에 `Closes #이슈번호`를 포함한다.
+- PR 제목은 Conventional Commit 스타일, 70자 이내.
+
 ## 이슈 생성 규칙
 
 ### 라벨
@@ -21,8 +91,6 @@
 
 ### 본문 형식
 
-아래 순서를 반드시 지킨다.
-
 ```markdown
 ## 배경
 <!-- 왜 이 작업이 필요한지 설명 -->
@@ -38,11 +106,8 @@
 <!-- 참고 사항, 관련 이슈 링크 등 -->
 ```
 
-## 커밋 · 브랜치 컨벤션
+## 코드 스타일
 
-[CONTRIBUTING.md](./CONTRIBUTING.md)의 Commit Convention 및 Development Workflow 섹션을 따른다.
-
-## PR 규칙
-
-- PR 템플릿(`.github/pull_request_template.md`)을 따른다.
-- 관련 이슈가 있으면 본문에 `Closes #이슈번호`를 포함한다.
+- Rust: `cargo fmt` 포맷 준수, `clippy` 경고 없어야 함
+- JS: ESM (`import`/`export`), `node --check`로 구문 검증
+- 보안 취약점 (injection, XSS 등) 절대 금지
