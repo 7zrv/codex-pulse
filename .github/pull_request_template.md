@@ -4,7 +4,13 @@
 ## Changes
 -
 
+## Related Issue
+<!-- Closes #이슈번호 -->
+Closes #
+
 ## Test Plan
-- [ ] `cargo check` 통과
+- [ ] `cargo fmt --check` 통과
+- [ ] `cargo clippy -- -D warnings` 통과
+- [ ] `cargo test` 통과
 - [ ] `npm run check` 통과
 - [ ] 관련 기능 수동 확인
