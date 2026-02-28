@@ -1,7 +1,7 @@
 use serde::Serialize;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use std::collections::HashMap;
-use std::fs::{File, metadata, read};
+use std::fs::{metadata, read, File};
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::net::{TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
@@ -10,8 +10,8 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use time::OffsetDateTime;
 use time::format_description::well_known::Rfc3339;
+use time::OffsetDateTime;
 
 #[derive(Clone)]
 struct App {
@@ -191,7 +191,11 @@ fn extract_thread_id(line: &str) -> Option<String> {
             break;
         }
     }
-    if id.is_empty() { None } else { Some(id) }
+    if id.is_empty() {
+        None
+    } else {
+        Some(id)
+    }
 }
 
 fn workflow_row(state: &State, role_id: &str) -> WorkflowRow {
@@ -269,17 +273,20 @@ fn append_event(app: &App, evt: Event) {
             state.recent.truncate(200);
         }
 
-        let row = state.by_agent.entry(evt.agent_id.clone()).or_insert(AgentRow {
-            agent_id: evt.agent_id.clone(),
-            last_seen: evt.received_at.clone(),
-            total: 0,
-            ok: 0,
-            warning: 0,
-            error: 0,
-            token_total: 0,
-            last_event: evt.event.clone(),
-            latency_ms: None,
-        });
+        let row = state
+            .by_agent
+            .entry(evt.agent_id.clone())
+            .or_insert(AgentRow {
+                agent_id: evt.agent_id.clone(),
+                last_seen: evt.received_at.clone(),
+                total: 0,
+                ok: 0,
+                warning: 0,
+                error: 0,
+                token_total: 0,
+                last_event: evt.event.clone(),
+                latency_ms: None,
+            });
 
         row.last_seen = evt.received_at.clone();
         row.total += 1;
@@ -494,7 +501,12 @@ fn serve_static(app: &App, path: &str) -> Vec<u8> {
     let full = app.public_dir.join(rel);
     let canonical = match full.canonicalize() {
         Ok(p) => p,
-        Err(_) => return json_response("404 Not Found", &json!({ "error": "Not found" }).to_string()),
+        Err(_) => {
+            return json_response(
+                "404 Not Found",
+                &json!({ "error": "Not found" }).to_string(),
+            )
+        }
     };
     let base = match app.public_dir.canonicalize() {
         Ok(p) => p,
@@ -506,12 +518,18 @@ fn serve_static(app: &App, path: &str) -> Vec<u8> {
         }
     };
     if !canonical.starts_with(&base) {
-        return json_response("403 Forbidden", &json!({ "error": "Forbidden" }).to_string());
+        return json_response(
+            "403 Forbidden",
+            &json!({ "error": "Forbidden" }).to_string(),
+        );
     }
 
     match read(canonical) {
         Ok(bytes) => bytes_response("200 OK", &bytes, content_type_for(clean)),
-        Err(_) => json_response("404 Not Found", &json!({ "error": "Not found" }).to_string()),
+        Err(_) => json_response(
+            "404 Not Found",
+            &json!({ "error": "Not found" }).to_string(),
+        ),
     }
 }
 
@@ -575,7 +593,8 @@ fn handle_client(mut stream: TcpStream, app: App) {
         ("GET", "/api/alerts") => {
             let body = {
                 let state = app.state.lock().unwrap_or_else(|e| e.into_inner());
-                json!({ "alerts": state.alerts.iter().take(50).cloned().collect::<Vec<_>>() }).to_string()
+                json!({ "alerts": state.alerts.iter().take(50).cloned().collect::<Vec<_>>() })
+                    .to_string()
             };
             let _ = stream.write_all(&json_response("200 OK", &body));
         }
@@ -633,7 +652,11 @@ fn handle_client(mut stream: TcpStream, app: App) {
     }
 }
 
-fn read_delta_lines(file_path: &Path, cursor: &mut (u64, String), max_read_bytes: u64) -> Vec<String> {
+fn read_delta_lines(
+    file_path: &Path,
+    cursor: &mut (u64, String),
+    max_read_bytes: u64,
+) -> Vec<String> {
     let meta = match metadata(file_path) {
         Ok(m) => m,
         Err(_) => return vec![],
@@ -888,7 +911,14 @@ fn spawn_codex_collector(app: App, codex_home: PathBuf, poll_ms: u64, backfill_l
 
         // initial backfill
         if let Ok(contents) = std::fs::read_to_string(&history) {
-            for line in contents.lines().rev().take(backfill_lines).collect::<Vec<_>>().into_iter().rev() {
+            for line in contents
+                .lines()
+                .rev()
+                .take(backfill_lines)
+                .collect::<Vec<_>>()
+                .into_iter()
+                .rev()
+            {
                 if let Some(evt) = parse_history_event(line, &app) {
                     append_event(&app, evt);
                 }
@@ -896,7 +926,14 @@ fn spawn_codex_collector(app: App, codex_home: PathBuf, poll_ms: u64, backfill_l
         }
 
         if let Ok(contents) = std::fs::read_to_string(&log) {
-            for line in contents.lines().rev().take(backfill_lines).collect::<Vec<_>>().into_iter().rev() {
+            for line in contents
+                .lines()
+                .rev()
+                .take(backfill_lines)
+                .collect::<Vec<_>>()
+                .into_iter()
+                .rev()
+            {
                 if let Some(evt) = parse_log_event(
                     line,
                     &app,
@@ -956,11 +993,13 @@ fn main() {
         .map(PathBuf::from)
         .unwrap_or_else(|_| {
             let home = std::env::var("HOME")
-            .or_else(|_| std::env::var("USERPROFILE"))
-            .unwrap_or_else(|_| ".".to_string());
+                .or_else(|_| std::env::var("USERPROFILE"))
+                .unwrap_or_else(|_| ".".to_string());
             PathBuf::from(home).join(".codex")
         });
-    let api_key = std::env::var("MONITOR_API_KEY").ok().filter(|v| !v.is_empty());
+    let api_key = std::env::var("MONITOR_API_KEY")
+        .ok()
+        .filter(|v| !v.is_empty());
 
     let listener = TcpListener::bind(format!("{}:{}", host, port)).expect("bind failed");
 
@@ -968,9 +1007,11 @@ fn main() {
         state: Arc::new(Mutex::new(State::default())),
         sse_clients: Arc::new(Mutex::new(Vec::new())),
         event_seq: Arc::new(AtomicU64::new(1)),
-        public_dir: Arc::new(std::env::var("PUBLIC_DIR")
-            .map(PathBuf::from)
-            .unwrap_or_else(|_| PathBuf::from("public"))),
+        public_dir: Arc::new(
+            std::env::var("PUBLIC_DIR")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("public")),
+        ),
         api_key,
     };
 
