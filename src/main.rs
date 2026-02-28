@@ -797,10 +797,7 @@ fn parse_log_event(
         let thread_id = extract_thread_id(line).unwrap_or_else(|| "global".to_string());
         let prev_opt = thread_token_totals.get(&thread_id).copied();
         thread_token_totals.insert(thread_id.clone(), current_total);
-        let prev = match prev_opt {
-            Some(v) => v,
-            None => return None,
-        };
+        let prev = prev_opt?;
 
         let delta = if current_total >= prev {
             current_total.saturating_sub(prev)
